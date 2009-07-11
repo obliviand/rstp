@@ -87,8 +87,12 @@ struct ifdata {
 };
 
 /* Instances */
+static int stp_up = 0;
 struct ifdata *current_br = NULL;
 
+/*! \function void instance_begin(struct ifdata *br)
+ *  \brief Start a new instance of STP on a bridge.
+ */
 void instance_begin(struct ifdata *br)
 {
 	if (current_br) {
@@ -99,12 +103,18 @@ void instance_begin(struct ifdata *br)
 	STP_IN_instance_begin(br->stp);
 }
 
+/*! \function void instance_end(void)
+ *  \brief End an instance of STP on a bridge.
+ */
 void instance_end(void)
 {
 	STP_IN_instance_end(current_br->stp);
 	current_br = NULL;
 }
 
+/*! \function struct ifdata *find_port(int port_index)
+ *  \brief Find a port in the bridge port list using an index.
+ */
 struct ifdata *find_port(int port_index)
 {
 	struct ifdata *ifc = current_br->port_list;
@@ -125,7 +135,10 @@ UID_STP_CFG_T default_bridge_stp_cfg = {
 	.force_version = DEF_FORCE_VERS,	/*NORMAL_RSTP */
 };
 
-void update_bridge_stp_config(struct ifdata *br, UID_STP_CFG_T * cfg)
+/*! \function void update_bridge_stp_config(struct ifdata *br, UID_STP_CFG_T *cfg)
+ *  \brief Update the per-bridge STP parameters.
+ */
+void update_bridge_stp_config(struct ifdata *br, UID_STP_CFG_T *cfg)
 {
 	if (cfg->field_mask & BR_CFG_PRIO)
 		br->bridge_priority = cfg->bridge_priority;
@@ -148,7 +161,10 @@ UID_STP_PORT_CFG_T default_port_stp_cfg = {
 	.admin_point2point = DEF_P2P,
 };
 
-void update_port_stp_config(struct ifdata *ifc, UID_STP_PORT_CFG_T * cfg)
+/*! \function void update_port_stp_config(struct ifdata *ifc, UID_STP_PORT_CFG_T *cfg)
+ *  \brief Update per-port STP parameters.
+ */
+void update_port_stp_config(struct ifdata *ifc, UID_STP_PORT_CFG_T *cfg)
 {
 	if (cfg->field_mask & PT_CFG_PRIO)
 		ifc->port_priority = cfg->port_priority;
@@ -163,7 +179,9 @@ void update_port_stp_config(struct ifdata *ifc, UID_STP_PORT_CFG_T * cfg)
 }
 
 /**************************************************************/
-
+/*! \function int add_port_stp(struct ifdata *ifc)
+ *  \brief Add STP protocol binding to a port on a bridge.
+ */
 int add_port_stp(struct ifdata *ifc)
 {				/* Bridge is ifc->master */
 	TST((ifc->port_index = get_bridge_portno(ifc->name)) >= 0, -1);
@@ -184,6 +202,9 @@ int add_port_stp(struct ifdata *ifc)
 	return 0;
 }
 
+/*! \function void remove_port_stp(struct ifdata *ifc)
+ *  \brief Remove STP protocol from a port on a bridge.
+ */
 void remove_port_stp(struct ifdata *ifc)
 {
 	/* Remove port from STP */
@@ -198,6 +219,9 @@ void remove_port_stp(struct ifdata *ifc)
 	}
 }
 
+/*! \function int init_rstplib_instance(struct ifdata *br)
+ *  \brief Initialize the RSTP Library instance.
+ */
 int init_rstplib_instance(struct ifdata *br)
 {
 	br->stp = STP_IN_instance_create();
@@ -220,6 +244,9 @@ int init_rstplib_instance(struct ifdata *br)
 	return 0;
 }
 
+/*! \function void clear_rstplib_instance(struct ifdata *br)
+ *  \brief Delete all instances of the RSTP Library.
+ */
 void clear_rstplib_instance(struct ifdata *br)
 {
 	instance_begin(br);
@@ -234,6 +261,9 @@ void clear_rstplib_instance(struct ifdata *br)
 	br->stp = NULL;
 }
 
+/*! \function int init_bridge_stp(struct ifdata *br)
+ *  \brief Initialize bridge level instance of RSTP.
+ */
 int init_bridge_stp(struct ifdata *br)
 {
 	if (br->stp_up) {
@@ -264,6 +294,9 @@ int init_bridge_stp(struct ifdata *br)
 	return 0;
 }
 
+/*! \function void clear_bridge_stp(struct ifdata *br)
+ *  \brief Delete bridge level instance of RSTP.
+ */
 void clear_bridge_stp(struct ifdata *br)
 {
 	if (!br->stp_up)
@@ -281,6 +314,9 @@ void clear_bridge_stp(struct ifdata *br)
 struct ifdata *if_head = NULL;
 struct ifdata *br_head = NULL;
 
+/*! \function struct ifdata *find_if(int if_index)
+ *  \brief Find an interface in the list using an index.
+ */
 struct ifdata *find_if(int if_index)
 {
 	struct ifdata *p = if_head;
@@ -306,8 +342,11 @@ struct ifdata *find_if(int if_index)
         *_prev = (_ifc)->_next; \
     } while (0)
 
-/* Caller ensures that there isn't any ifdata with this index */
-/* If br is NULL, new interface is a bridge, else it is a port of br */
+/*! \function struct ifdata *create_if(int if_index, struct ifdata *br)
+ *  \brief Create an interface in the bridge list.
+ *  Caller ensures that there isn't any ifdata with this index
+ *  If br is NULL, new interface is a bridge, else it is a port of br
+ */
 struct ifdata *create_if(int if_index, struct ifdata *br)
 {
 	struct ifdata *p;
@@ -354,6 +393,9 @@ struct ifdata *create_if(int if_index, struct ifdata *br)
 	return p;
 }
 
+/*! \function void delete_if(struct ifdata *ifc)
+ *  \brief Delete an inteface from the bridge list.
+ */
 void delete_if(struct ifdata *ifc)
 {
 	INFO("Delete iface %s", ifc->name);
@@ -383,6 +425,9 @@ void delete_if(struct ifdata *ifc)
 	free(ifc);
 }
 
+/*! \function static int stp_enabled(struct ifdata *br)
+ *  \brief Check if STP is enabled on a bridge.
+ */
 static int stp_enabled(struct ifdata *br)
 {
 	char path[40 + IFNAMSIZ];
@@ -393,13 +438,16 @@ static int stp_enabled(struct ifdata *br)
 		return 0;
 	}
 	int enabled = 0;
-	fscanf(f, "%d", &enabled);
+	if (fscanf(f, "%d", &enabled)){};
 	fclose(f);
 	INFO("STP on %s state %d", br->name, enabled);
 
 	return enabled == 2;	/* ie user mode STP */
 }
 
+/*! \function void set_br_up(struct ifdata *br, int up)
+ *  \brief Bring up bridge inteface if it is down.
+ */
 void set_br_up(struct ifdata *br, int up)
 {
 	int stp_up = stp_enabled(br);
@@ -418,6 +466,9 @@ void set_br_up(struct ifdata *br, int up)
 	}
 }
 
+/*! \function void set_if_up(struct ifdata *ifc, int up)
+ *  \brief Bring up a port on the bridge if it is down.
+ */
 void set_if_up(struct ifdata *ifc, int up)
 {
 	INFO("Port %s : %s", ifc->name, (up ? "up" : "down"));
@@ -578,6 +629,7 @@ void bridge_bpdu_rcv(int if_index, const unsigned char *data, int len)
 		return;
 
 	TST(ifc->up,);
+	TST(ifc->master,);
 	TST(ifc->master->stp_up,);
 	TST(len > sizeof(MAC_HEADER_T) + sizeof(ETH_HEADER_T) + sizeof(BPDU_HEADER_T),);
 
@@ -586,22 +638,25 @@ void bridge_bpdu_rcv(int if_index, const unsigned char *data, int len)
 		return;
 
 	switch (bpdu->hdr.bpdu_type) {
-	case BPDU_RSTP:
-		TST(len >= 36,);
-	case BPDU_CONFIG_TYPE:
-		TST(len >= 35,);
-		/* 802.1w doesn't ask for this */
-		//    TST(ntohs(*(uint16_t*)bpdu.body.message_age)
-		//        < ntohs(*(uint16_t*)bpdu.body.max_age), );
-		TST(memcmp(bpdu->body.bridge_id, &ifc->master->bridge_id, 8) != 0
-		    || (ntohs(*(uint16_t *) bpdu->body.port_id) & 0xfff) !=
-		    ifc->port_index,);
-		break;
-	case BPDU_TOPO_CHANGE_TYPE:
-		break;
-	default:
-		LOG("Receive unknown bpdu type %x", bpdu->hdr.bpdu_type);
-		return;
+		case BPDU_RSTP:
+			LOG("Receive BPDU_RSTP");
+			TST(len >= 36,);
+		case BPDU_CONFIG_TYPE:
+			LOG("Receive BPDU_CONFIG_TYPE");
+			TST(len >= 35,);
+			/* 802.1w doesn't ask for this */
+			//    TST(ntohs(*(uint16_t*)bpdu.body.message_age)
+			//        < ntohs(*(uint16_t*)bpdu.body.max_age), );
+			TST(memcmp(bpdu->body.bridge_id, &ifc->master->bridge_id, 8) != 0
+			    || (ntohs(*(uint16_t *) bpdu->body.port_id) & 0xfff) !=
+			    ifc->port_index,);
+			break;
+		case BPDU_TOPO_CHANGE_TYPE:
+			LOG("Receive BPDU_TOPO_CHANGE_TYPE");
+			break;
+		default:
+			LOG("Receive unknown bpdu type %x", bpdu->hdr.bpdu_type);
+			return;
 	}
 
 	// dump_hex(data, len);
@@ -681,12 +736,13 @@ STP_OUT_flush_lt(IN int port_index, IN int vlan_id,
 	return 0;
 }
 
-void /* for bridge id calculation */ STP_OUT_get_port_mac(IN int port_index,
-							  OUT unsigned char
-							  *mac)
+/* for bridge id calculation */
+void STP_OUT_get_port_mac(IN int port_index,
+			  OUT unsigned char *mac)
 {
 	LOG("port index %d", port_index);
 	struct ifdata *port = find_port(port_index);
+	
 	TST(port != NULL,);
 	get_hwaddr(port->name, mac);
 }
@@ -695,32 +751,39 @@ unsigned long STP_OUT_get_port_oper_speed(IN unsigned int port_index)
 {
 	LOG("port index %d", port_index);
 	struct ifdata *port = find_port(port_index);
+	
 	TST(port != NULL, 0);
 	LOG("Speed: %d", port->speed);
+	
 	return port->speed;
 }
 
-int /* 1- Up, 0- Down */ STP_OUT_get_port_link_status(IN int port_index)
+/* 1- Up, 0- Down */
+int STP_OUT_get_port_link_status(IN int port_index)
 {
 	LOG("port index %d", port_index);
 	struct ifdata *port = find_port(port_index);
+	
 	TST(port != NULL, 0);
 	LOG("Link status: %d", port->up);
+	
 	return port->up;
 }
 
-int /* 1- Full, 0- Half */ STP_OUT_get_duplex(IN int port_index)
+/* 1- Full, 0- Half */
+int STP_OUT_get_duplex(IN int port_index)
 {
 	LOG("port index %d", port_index);
 	struct ifdata *port = find_port(port_index);
+	
 	TST(port != NULL, 0);
 	LOG("Duplex: %d", port->duplex);
+	
 	return port->duplex;
 }
 
-int
-STP_OUT_set_port_state(IN int port_index, IN int vlan_id,
-		       IN RSTP_PORT_STATE state)
+int STP_OUT_set_port_state(IN int port_index, IN int vlan_id,
+			   IN RSTP_PORT_STATE state)
 {
 	LOG("port index %d, state %d", port_index, state);
 	struct ifdata *port = find_port(port_index);
@@ -729,22 +792,38 @@ STP_OUT_set_port_state(IN int port_index, IN int vlan_id,
 
 	int br_state;
 	switch (state) {
-	case UID_PORT_DISCARDING:
-		br_state = BR_STATE_BLOCKING;
-		break;
-	case UID_PORT_LEARNING:
-		br_state = BR_STATE_LEARNING;
-		break;
-	case UID_PORT_FORWARDING:
-		br_state = BR_STATE_FORWARDING;
-		break;
-	default:
-		fprintf(stderr, "set_port_state: Unexpected state %d\n", state);
-		return -1;
+		case UID_PORT_DISCARDING:
+			br_state = BR_STATE_BLOCKING;
+			break;
+		case UID_PORT_LEARNING:
+			br_state = BR_STATE_LEARNING;
+			break;
+		case UID_PORT_FORWARDING:
+			br_state = BR_STATE_FORWARDING;
+			break;
+		default:
+			fprintf(stderr, "set_port_state: Unexpected state %d\n", state);
+			return -1;
 	}
 	if (port->up)
 		bridge_set_state(port->if_index, br_state);
 	return 0;
+}
+
+int STP_OUT_set_learning(int port_index, int vlan_id, int enable)
+{
+	if (enable) {
+		return STP_OUT_set_port_state(port_index, vlan_id, UID_PORT_LEARNING);
+	}
+	return STP_OUT_set_port_state(port_index, vlan_id, UID_PORT_DISCARDING);
+}
+
+int STP_OUT_set_forwarding(int port_index, int vlan_id, int enable)
+{
+	if (enable) {
+		return STP_OUT_set_port_state (port_index, vlan_id, UID_PORT_FORWARDING);
+	}
+	return STP_OUT_set_port_state(port_index, vlan_id, UID_PORT_DISCARDING);
 }
 
 int STP_OUT_set_hardware_mode(int vlan_id, UID_STP_MODE_T mode)
@@ -753,17 +832,22 @@ int STP_OUT_set_hardware_mode(int vlan_id, UID_STP_MODE_T mode)
 	return 0;
 }
 
-int
-STP_OUT_tx_bpdu(IN int port_index, IN int vlan_id,
-		IN unsigned char *bpdu, IN size_t bpdu_len)
+int STP_OUT_tx_bpdu(IN int port_index, IN int vlan_id,
+		    IN unsigned char *bpdu, IN size_t bpdu_len)
 {
 	LOG("port index %d, len %zd", port_index, bpdu_len);
 	struct ifdata *port = find_port(port_index);
+
 	TST(port != NULL, 0);
 	TST(vlan_id == 0, 0);
 
-	packet_send(port->if_index, bpdu,
-		    bpdu_len + sizeof(MAC_HEADER_T) + sizeof(ETH_HEADER_T));
+	/* This check lets the state machines stablize before
+	 * sending BPDUs
+	 */
+	if (stp_up) {
+		packet_send(port->if_index, bpdu,
+				bpdu_len + sizeof(MAC_HEADER_T) + sizeof(ETH_HEADER_T));
+	}
 	return 0;
 }
 
@@ -771,7 +855,9 @@ const char *STP_OUT_get_port_name(IN int port_index)
 {
 	LOG("port index %d", port_index);
 	struct ifdata *port = find_port(port_index);
+	
 	TST(port != NULL, 0);
+	
 	return port->name;
 }
 
@@ -789,9 +875,8 @@ int STP_OUT_get_init_stpm_cfg(IN int vlan_id, INOUT UID_STP_CFG_T * cfg)
 	return 0;
 }
 
-int
-STP_OUT_get_init_port_cfg(IN int vlan_id,
-			  IN int port_index, INOUT UID_STP_PORT_CFG_T * cfg)
+int STP_OUT_get_init_port_cfg(IN int vlan_id,
+			      IN int port_index, INOUT UID_STP_PORT_CFG_T * cfg)
 {
 	LOG("port index %d", port_index);
 	struct ifdata *port = find_port(port_index);
@@ -852,6 +937,7 @@ int CTL_enable_bridge_rstp(int br_index, int enable)
 			r = enable ? init_bridge_stp(br)
 			    : (clear_bridge_stp(br), 0);
 	}
+	stp_up = 1;
 	return r;
 }
 
@@ -901,7 +987,7 @@ int CTL_set_bridge_config(int br_index, UID_STP_CFG_T * cfg)
 }
 
 int CTL_get_port_state(int br_index, int port_index,
-		       UID_STP_PORT_CFG_T * cfg, UID_STP_PORT_STATE_T * state)
+		       UID_STP_PORT_CFG_T *cfg, UID_STP_PORT_STATE_T *state)
 {
 	LOG("bridge %d port %d", br_index, port_index);
 	CTL_CHECK_BRIDGE_PORT;

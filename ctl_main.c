@@ -185,12 +185,10 @@ static int do_showbridge(const char *br_name)
 		printf("Root Port:       none\n");
 	}
 
-	if (uid_state.Topo_Change)
-		printf("Topology Change Count: %lu\n",
-		       uid_state.Topo_Change_Count);
-	else
-		printf("Time Since Topology Change: %lu\n",
-		       uid_state.timeSince_Topo_Change);
+	printf("Topology Change Count: %lu\n",
+	       uid_state.Topology_Change_Count);
+	printf("Time Since Topology Change: %lu\n",
+	       uid_state.Time_Since_Topology_Change);
 
 	printf("Max Age:         %2d   Bridge Max Age:       %-2d\n",
 	       (int)uid_state.max_age, (int)uid_cfg.max_age);
@@ -299,15 +297,15 @@ static int do_showport(int br_index, const char *port_name,
 
 		printf("Point2Point:       admin: ");
 		switch (uid_cfg.admin_point2point) {
-		case P2P_FORCE_TRUE:
-			printf("%-9s", "ForceYes");
-			break;
-		case P2P_FORCE_FALSE:
-			printf("%-9s", "ForceNo");
-			break;
-		case P2P_AUTO:
-			printf("%-9s", "Auto");
-			break;
+			case P2P_FORCE_TRUE:
+				printf("%-9s", "ForceYes");
+				break;
+			case P2P_FORCE_FALSE:
+				printf("%-9s", "ForceNo");
+				break;
+			case P2P_AUTO:
+				printf("%-9s", "Auto");
+				break;
 		}
 		printf("       oper: %-9s\n",
 		       uid_port.oper_point2point ? "Yes" : "No");
@@ -332,24 +330,24 @@ static int do_showport(int br_index, const char *port_name,
 			}
 			printf("Role:              ");
 			switch (uid_port.role) {
-			case 'A':
-				printf("Alternate\n");
-				break;
-			case 'B':
-				printf("Backup\n");
-				break;
-			case 'R':
-				printf("Root\n");
-				break;
-			case 'D':
-				printf("Designated\n");
-				break;
-			case '-':
-				printf("NonStp\n");
-				break;
-			default:
-				printf("Unknown(%c)\n", uid_port.role);
-				break;
+				case 'A':
+					printf("Alternate\n");
+					break;
+				case 'B':
+					printf("Backup\n");
+					break;
+				case 'R':
+					printf("Root\n");
+					break;
+				case 'D':
+					printf("Designated\n");
+					break;
+				case '-':
+					printf("NonStp\n");
+					break;
+				default:
+					printf("Unknown(%c)\n", uid_port.role);
+					break;
 			}
 
 			if ('R' == uid_port.role || 'D' == uid_port.role) {
@@ -365,7 +363,7 @@ static int do_showport(int br_index, const char *port_name,
 #if 0
 			printf("helloWhen:       %3d  ",
 			       (int)uid_port.helloWhen);
-			printf("lnkWhile:      %3d\n", (int)uid_port.lnkWhile);
+			printf("edgeDelayWhile:      %3d\n", (int)uid_port.edgeDelayWhile);
 			printf("fdWhile:         %3d\n", (int)uid_port.fdWhile);
 #endif
 		} else if ('-' != uid_port.role) {
@@ -377,7 +375,7 @@ static int do_showport(int br_index, const char *port_name,
 #if 0
 			printf("mdelayWhile:     %3d  ",
 			       (int)uid_port.mdelayWhile);
-			printf("lnkWhile:      %3d\n", (int)uid_port.lnkWhile);
+			printf("edgeDelayWhile:      %3d\n", (int)uid_port.edgeDelayWhile);
 			printf("helloWhen:       %3d  ",
 			       (int)uid_port.helloWhen);
 			printf("txCount:       %3d\n", (int)uid_port.txCount);

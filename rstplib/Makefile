@@ -1,5 +1,5 @@
 #************************************************************************
-#* RSTP library - Rapid Spanning Tree (802.1t, 802.1w)
+#* RSTP library - Rapid Spanning Tree (802.1D-2004)
 #* Copyright (C) 2001-2003 Optical Access
 #* Author: Alex Rozin
 #*
@@ -21,9 +21,11 @@
 #**********************************************************************/
 
 DEFS=
-CC = gcc
-#CFLAGS = -g -Wall -D_REENTRANT -D__LINUX__ -DSTP_DBG=1 
-CFLAGS = -g -O -Wall -D_REENTRANT -D__LINUX__
+CC = gcc #-E
+
+DEBUG= -ggdb #-fno-stack-protector -fno-pic -fno-pie -nopie
+#CFLAGS = -g -Wall -D_REENTRANT -D__LINUX__ -DSTP_DBG=1 -DOLD_READLINE
+CFLAGS = -Wall -D_REENTRANT -D__LINUX__ -DSTP_DBG=1 $(DEBUG) #-DORIG=1
 
 INCLUDES = -I.
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CFLAGS)
@@ -38,6 +40,7 @@ SOFLAGS =  -nostartfiles -shared
 EXECUTABLE= bridge mngr
 RSTPLIBS = rstp
 RSTPLIBF = lib$(RSTPLIBS).a
+RSTPLIBSO = lib$(RSTPLIBS).so
 UIDLIBS  = uid
 UIDLIBF  = lib$(UIDLIBS).a
 CLILIBS  = cli
@@ -51,11 +54,11 @@ BRIDGEOFILES = bridge.o stp_cli.o stp_to.o
 RSTPCFILES = statmch.c stpm.c port.c stpmgmt.c stp_in.c rolesel.c \
 vector.c times.c \
 portinfo.c roletrns.c sttrans.c topoch.c migrate.c transmit.c \
-p2p.c edge.c pcost.c
+p2p.c pcost.c receive.c brdgdet.c
 RSTPOFILES = statmch.o stpm.o port.o stpmgmt.o stp_in.o rolesel.o \
 vector.o times.o \
 portinfo.o roletrns.o sttrans.o topoch.o migrate.o transmit.o \
-p2p.o edge.o pcost.o
+p2p.o pcost.o receive.o brdgdet.o
 
 UIDCFILES = uid_sock.c
 UIDOFILES = uid_sock.o
@@ -72,15 +75,21 @@ OFILES= $(MNGROFILES) $(BRIDGEOFILES) $(RSTPOFILES) $(UIDOFILES) $(CLIOFILES)
 all: depend $(EXECUTABLE)
 
 mngr: ${MNGROFILES} $(UIDLIBF) $(CLILIBF)
-	$(CC) ${MNGROFILES} $(LIBS) -L. -l$(UIDLIBS) -l$(CLILIBS) -o $@
+	$(CC) $(CFLAGS) ${MNGROFILES} $(LIBS) -L. -l$(UIDLIBS) -l$(CLILIBS) -o $@
 
 bridge: ${BRIDGEOFILES} $(RSTPLIBF) $(UIDLIBF) $(CLILIBF)
-	$(CC) ${BRIDGEOFILES} $(LIBS) -L. -l$(RSTPLIBS) -l$(UIDLIBS) -l$(CLILIBS) -o $@
+	$(CC) $(CFLAGS) ${BRIDGEOFILES} $(LIBS) -L. -l$(RSTPLIBS) -l$(UIDLIBS) -l$(CLILIBS) -o $@
 
 $(RSTPLIBF): ${RSTPOFILES}
 	-rm -f $@
 	$(AR) $(ARFLAGS) $@ $(RSTPOFILES)
 	$(RANLIB)  $@
+
+$(RSTPLIBSO): ${RSTPOFILES}
+	-rm -f $@
+	$(CC) $(CFLAGS) -shared -Wl,-soname,$@.1 -o $@.1.0.0 $(RSTPOFILES)
+	ln -s $@.1.0.0 $@.1
+	ln -s $@.1 $@
 	
 $(UIDLIBF): ${UIDOFILES}
 	-rm -f $@
@@ -93,7 +102,7 @@ $(CLILIBF): $(CLIOFILES)
 	$(RANLIB) $@
 
 clean:
-	rm -f all *.o *.a *~ $(EXECUTABLE) *.bak make.depend
+	rm -f all *.o *.a *.so* *~ $(EXECUTABLE) *.bak make.depend
 
 depend:
 	echo "# DO NOT DELETE THIS LINE -- make  depend  depends  on it." > make.depend

@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -20,19 +20,16 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* Port State Transition state machine : 17.24 */
+/* Port State Transition state machine : 17.30 */
 
 #ifndef _STP_STATE_TRANSIT_H__
 #define _STP_STATE_TRANSIT_H__
     
-void
-STP_sttrans_enter_state (STATE_MACH_T* s);
+void STP_sttrans_enter_state(STATE_MACH_T *s);
 
-Bool
-STP_sttrans_check_conditions (STATE_MACH_T* s);
+Bool STP_sttrans_check_conditions(STATE_MACH_T *s);
 
-char*
-STP_sttrans_get_state_name (int state);
+char *STP_sttrans_get_state_name(int state);
 
 #endif /* _STP_STATE_TRANSIT_H__ */
 

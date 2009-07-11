@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -20,19 +20,16 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* Note: this state mashine distinkts from described in P802.1t Clause 18. */
-/* I am ready to discuss it                                                */
- 
-#ifndef _STP_EDGE_H__
-#define _STP_EDGE_H__
+/* Port Receive state machine : 17.23 */
+  
+#ifndef _STP_RECEIVE_H__
+#define _STP_RECEIVE_H__
 
-void
-STP_edge_enter_state (STATE_MACH_T* s);
+void STP_receive_enter_state(STATE_MACH_T *s);
+  
+Bool STP_receive_check_conditions(STATE_MACH_T *s);
 
-Bool
-STP_edge_check_conditions (STATE_MACH_T* s);
+char *STP_receive_get_state_name(int state);
 
-char*
-STP_edge_get_state_name (int state);
+#endif /* _STP_RECEIVE_H__ */
 
-#endif /* _STP_EDGE_H__ */

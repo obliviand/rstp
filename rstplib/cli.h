@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -29,38 +29,38 @@
 #define MAX_CLI_PROMT	24
 #define MAX_SELECTOR	12
 
-typedef int CLI_CMD_CLBK (int argc, char** argv);
+typedef int CLI_CMD_CLBK(int argc, char** argv);
 
 typedef enum {
-  CMD_PAR_NUMBER,
-  CMD_PAR_STRING,
-  CMD_PAR_BOOL_YN,
-  CMD_PAR_ENUM,
+	CMD_PAR_NUMBER,
+	CMD_PAR_STRING,
+	CMD_PAR_BOOL_YN,
+	CMD_PAR_ENUM,
 } CMD_PARAM_TYPE_T;
 
 typedef struct cmd_par_number_limits_s {
-  unsigned long min;
-  unsigned long max;
+	unsigned long min;
+	unsigned long max;
 } CMD_PAR_LIMITS;
 
 typedef struct cmd_par_string_selector_s {
-  char* string_value;
-  char* string_help;
+	char *string_value;
+	char *string_help;
 } CMD_PAR_SELECTOR;
 
 typedef struct cmd_par_dscr_s {
-  char*			param_help;
-  CMD_PARAM_TYPE_T	param_type;
-  CMD_PAR_LIMITS	number_limits;
-  CMD_PAR_SELECTOR	string_selector[MAX_SELECTOR];
-  char*			default_value;
+	char *param_help;
+	CMD_PARAM_TYPE_T param_type;
+	CMD_PAR_LIMITS number_limits;
+	CMD_PAR_SELECTOR string_selector[MAX_SELECTOR];
+	char *default_value;
 } CMD_PAR_DSCR_T;
 
 typedef struct cmd_dscr_s {
-  char*			cmd_name;
-  char*			cmd_help;
-  CMD_PAR_DSCR_T	param[MAXPARAMNUM];
-  CLI_CMD_CLBK*		clbk;
+	char *cmd_name;
+	char *cmd_help;
+	CMD_PAR_DSCR_T param[MAXPARAMNUM];
+	CLI_CMD_CLBK* clbk;
 } CMD_DSCR_T;
 
 #define THE_COMMAND(x, y)	{x, y, {
@@ -69,25 +69,24 @@ typedef struct cmd_dscr_s {
 #define PARAM_ENUM(x) 			{x,CMD_PAR_ENUM,   {},           {
 #define PARAM_ENUM_SEL(x, y)		{x, y},
 #define PARAM_ENUM_DEFAULT(def)		}, def},
-#define PARAM_BOOL(x,yesd,nod,def)	{x, CMD_PAR_ENUM,  {}, {{"y",yesd},{"n",nod}},def}
+#define PARAM_BOOL(x,yesd,nod,def)	{x,CMD_PAR_ENUM,   {}, {{"y",yesd},{"n",nod}}, def}
 #define THE_FUNC(x)			}, &x}, 
 #define END_OF_LANG	{NULL,NULL}
 
-char *get_prompt (void); /* this function not from the lib ! */
+char *get_prompt(void); /* this function not from the lib ! */
 
-void cli_debug_dump_args (char* title, int argc, char** argv);
+void cli_debug_dump_args(char* title, int argc, char** argv);
 
-void cli_register_language (const CMD_DSCR_T* cmd_list);
-void usage (void);
-int cli_execute_command (const char* line);
+void cli_register_language(const CMD_DSCR_T* cmd_list);
+void usage(void);
+int cli_execute_command(const char* line);
 #ifdef OLD_READLINE
-void rl_read_cli (void);
+void rl_read_cli(void);
 #else
-void rl_read_cli (char *);
+void rl_read_cli(char *);
 #endif
-void rl_init (void);
-void rl_shutdown (void);
-char* UT_sprint_time_stamp (void);
+void rl_init(void);
+void rl_shutdown(void);
+char *UT_sprint_time_stamp(void);
 
 #endif /* _CLI_API__ */
-

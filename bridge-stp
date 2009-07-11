@@ -41,9 +41,9 @@ daemon() {
 
     [ -n "$pid" ] && return
     # start it
-    /sbin/rstpd
+    /sbin/rstpd -d > /var/log/rstpd.log 2>&1 &
     RETVAL=$?
-    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$service
+    [ $RETVAL -eq 0 ] && touch /var/lock/$service
 }
 
 start() {
@@ -53,9 +53,12 @@ start() {
 case $2 in
      start) 
 	daemon
-	exec /sbin/rstpctl $bridge on ;;
+	sleep 1 
+#	exec /sbin/rstpctl rstp $bridge on ;;
+	exit 0
+	;;
      stop)  
-	exec /sbin/rstpctl $bridge off ;;
+	exec /sbin/rstpctl rstp $bridge off ;;
      *)
      	echo "Unknown action:" $2
 	echo "Usage: bridge-stp <bridge> {start|stop}"

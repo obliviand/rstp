@@ -32,19 +32,19 @@ o libuid.a - the 'transport' library: the source code you
   uid.h & uid_sock.h
 
 o (so far, so good) librstp.a - it is a heart of the project
-  Actually, it implements 802.1w state machines. Files
+  Actually, it implements 802.1D-2004 state machines. Files
   stpm.c - the RSTP instance (some reflection of Port0)
   port.c - the RSTP port instance
-  portinfo.c - Port Information State Machine, 17.21
-  rolesel.c - Port Role Selection State Machine, 17.22 
-  roletrns.c - Port Role Transition State Machine, 17.23
-  sttrans.c - Port State Transition State Machine, 17.24
-  topoch.c - Topology Change State Machine, 17.25
-  migrate.c - Port Protocol Migration State Machine, 17.26
-  transmit.c - Port Transmit State Machine 17.27
+  portinfo.c - Port Information State Machine, 17.27
+  rolesel.c - Port Role Selection State Machine, 17.28 
+  roletrns.c - Port Role Transition State Machine, 17.29
+  sttrans.c - Port State Transition State Machine, 17.30
+  topoch.c - Topology Change State Machine, 17.31
+  migrate.c - Port Protocol Migration State Machine, 17.24
+  transmit.c - Port Transmit State Machine 17.26
+  brdgdet.c - Bridge Detection State Machine 17.25
   pcost.c - Path Cost Resolution State Machine
-  edge.c - operEdge Port Resolution State Machine
-  p2p.c - operPointToPoit Resolution State Machine
+  p2p.c - operPointToPoint Resolution State Machine
   statmch.c - generic state machine implementation
   vector.c - Priority Vectors manipulations
   times.c - Times manipulations 

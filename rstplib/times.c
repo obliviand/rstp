@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -24,53 +24,49 @@
  
 #include "base.h"
 
-int
-STP_compare_times (IN TIMEVALUES_T *t1, IN TIMEVALUES_T *t2)
+int STP_compare_times(IN TIMEVALUES_T *t1, IN TIMEVALUES_T *t2)
 {
-  if (t1->MessageAge < t2->MessageAge)     return -1;
-  if (t1->MessageAge > t2->MessageAge)     return  1;
+	if (t1->MessageAge < t2->MessageAge) return -1;
+	if (t1->MessageAge > t2->MessageAge) return 1;
 
-  if (t1->MaxAge < t2->MaxAge)             return -2;
-  if (t1->MaxAge > t2->MaxAge)             return  2;
+	if (t1->MaxAge < t2->MaxAge) return -2;
+	if (t1->MaxAge > t2->MaxAge) return 2;
 
-  if (t1->ForwardDelay < t2->ForwardDelay) return -3;
-  if (t1->ForwardDelay > t2->ForwardDelay) return  3;
+	if (t1->ForwardDelay < t2->ForwardDelay) return -3;
+	if (t1->ForwardDelay > t2->ForwardDelay) return 3;
 
-  if (t1->HelloTime < t2->HelloTime)       return -4;
-  if (t1->HelloTime > t2->HelloTime)       return  4;
+	if (t1->HelloTime < t2->HelloTime) return -4;
+	if (t1->HelloTime > t2->HelloTime) return 4;
 
-  return 0;
+	return 0;
 }
 
-void
-STP_get_times (IN BPDU_BODY_T *b, OUT TIMEVALUES_T *v)
+void STP_get_times(IN BPDU_BODY_T *b, OUT TIMEVALUES_T *v)
 {
-  v->MessageAge =   ntohs (*((unsigned short*) b->message_age))   >> 8;
-  v->MaxAge =       ntohs (*((unsigned short*) b->max_age))       >> 8;
-  v->ForwardDelay = ntohs (*((unsigned short*) b->forward_delay)) >> 8;
-  v->HelloTime =    ntohs (*((unsigned short*) b->hello_time))    >> 8;
+	v->MessageAge = ntohs (*((unsigned short*)b->message_age)) >> 8;
+	v->MaxAge = ntohs (*((unsigned short*)b->max_age)) >> 8;
+	v->ForwardDelay = ntohs (*((unsigned short*)b->forward_delay)) >> 8;
+	v->HelloTime = ntohs (*((unsigned short*)b->hello_time)) >> 8;
 }
 
-void
-STP_set_times (IN TIMEVALUES_T *v, OUT BPDU_BODY_T *b)
+void STP_set_times(IN TIMEVALUES_T *v, OUT BPDU_BODY_T *b)
 {
-  unsigned short mt;
-  #define STP_SET_TIME(f, t)        \
-     mt = htons (f << 8);           \
-     memcpy (t, &mt, 2); 
-  
-  STP_SET_TIME(v->MessageAge,   b->message_age);
-  STP_SET_TIME(v->MaxAge,       b->max_age);
-  STP_SET_TIME(v->ForwardDelay, b->forward_delay);
-  STP_SET_TIME(v->HelloTime,    b->hello_time);
+	unsigned short mt;
+#define STP_SET_TIME(f, t)		\
+		mt = htons (f << 8);	\
+		memcpy (t, &mt, 2); 
+
+	STP_SET_TIME(v->MessageAge, b->message_age);
+	STP_SET_TIME(v->MaxAge, b->max_age);
+	STP_SET_TIME(v->ForwardDelay, b->forward_delay);
+	STP_SET_TIME(v->HelloTime, b->hello_time);
 }
 
-void 
-STP_copy_times (OUT TIMEVALUES_T *t, IN TIMEVALUES_T *f)
+void STP_copy_times(OUT TIMEVALUES_T *t, IN TIMEVALUES_T *f)
 {
-  t->MessageAge = f->MessageAge;
-  t->MaxAge = f->MaxAge;
-  t->ForwardDelay = f->ForwardDelay;
-  t->HelloTime = f->HelloTime;
+	t->MessageAge = f->MessageAge;
+	t->MaxAge = f->MaxAge;
+	t->ForwardDelay = f->ForwardDelay;
+	t->HelloTime = f->HelloTime;
 }
 

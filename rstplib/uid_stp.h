@@ -1,5 +1,5 @@
 /************************************************************************
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w)
+ * RSTP library - Rapid Spanning Tree (802.1D-2004)
  * Copyright (C) 2001-2003 Optical Access
  * Author: Alex Rozin
  *
@@ -28,18 +28,18 @@
 #define NAME_LEN    20
 
 typedef enum {
-  STP_DISABLED,
-  STP_ENABLED,
+	STP_DISABLED,
+	STP_ENABLED,
 } UID_STP_MODE_T;
 
 typedef struct {
-  unsigned short  prio;
-  unsigned char   addr[6];
+	unsigned short prio;
+	unsigned char addr[6];
 } UID_BRIDGE_ID_T;
 
 typedef struct {
-  char      vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
-  char      action; /* 1-create, 0- delete */
+	char vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
+	char action; /* 1-create, 0- delete */
 } UID_STP_BR_CTRL_T;
 
 #define BR_CFG_STATE        (1L << 0)
@@ -62,55 +62,55 @@ typedef struct {
                    BR_CFG_HOLD_TIME
 
 typedef struct {
-  /* service data */
-  unsigned long     field_mask; /* which fields to change */
-  UID_STP_MODE_T    stp_enabled;
-  char              vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
+	/* service data */
+	unsigned long field_mask; /* which fields to change */
+	UID_STP_MODE_T stp_enabled;
+	char vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
 
-  /* protocol data */
-  int           bridge_priority;
-  int           max_age;
-  int           hello_time;
-  int           forward_delay;
-  int           force_version;
-  int           hold_time;
+	/* protocol data */
+	int bridge_priority;
+	int max_age;
+	int hello_time;
+	int forward_delay;
+	int force_version;
+	int hold_time;
 } UID_STP_CFG_T;
 
 typedef struct {
-  /* service data */
-  char              vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
-  unsigned long     vlan_id;
-  UID_STP_MODE_T    stp_enabled;
+	/* service data */
+	char vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
+	unsigned long vlan_id;
+	UID_STP_MODE_T stp_enabled;
 
-  /* protocol data */
-  UID_BRIDGE_ID_T   designated_root;
-  unsigned long     root_path_cost;
+	/* protocol data */
+	UID_BRIDGE_ID_T designated_root;
+	unsigned long root_path_cost;
 
-  unsigned long     timeSince_Topo_Change; /* 14.8.1.1.3.b: TBD */
-  unsigned long     Topo_Change_Count;     /* 14.8.1.1.3.c: TBD */
-  unsigned char     Topo_Change;           /* 14.8.1.1.3.d: TBD */
+	unsigned long Time_Since_Topology_Change;	/* 14.8.1.1.3.b */
+	unsigned long Topology_Change_Count;		/* 14.8.1.1.3.c */
+	unsigned char Topology_Change;			/* 14.8.1.1.3.d */
 
-  unsigned short    root_port;
-  int               max_age;
-  int               hello_time;
-  int               forward_delay;
-  UID_BRIDGE_ID_T   bridge_id;
+	unsigned short root_port;
+	int max_age;
+	int hello_time;
+	int forward_delay;
+	UID_BRIDGE_ID_T bridge_id;
 } UID_STP_STATE_T;
 
 typedef enum {
-  UID_PORT_DISABLED = 0,
-  UID_PORT_DISCARDING,
-  UID_PORT_LEARNING,
-  UID_PORT_FORWARDING,
-  UID_PORT_NON_STP
+	UID_PORT_DISABLED = 0,
+	UID_PORT_DISCARDING,
+	UID_PORT_LEARNING,
+	UID_PORT_FORWARDING,
+	UID_PORT_NON_STP
 } RSTP_PORT_STATE;
 
-typedef unsigned short  UID_PORT_ID;
+typedef unsigned short UID_PORT_ID;
 
 typedef enum {
-  P2P_FORCE_TRUE,
-  P2P_FORCE_FALSE,
-  P2P_AUTO,
+	P2P_FORCE_TRUE,
+	P2P_FORCE_FALSE,
+	P2P_AUTO,
 } ADMIN_P2P_T;
 
 #ifdef __BITMAP_H
@@ -138,66 +138,66 @@ typedef enum {
 #define ADMIN_PORT_PATH_COST_AUTO   0
 
 typedef struct {
-  /* service data */
-  unsigned long field_mask; /* which fields to change */
-  BITMAP_T      port_bmp;   
-  char          vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
+	/* service data */
+	unsigned long field_mask; /* which fields to change */
+	BITMAP_T port_bmp;
+	char vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
 
-  /* protocol data */
-  int           port_priority;
-  unsigned long admin_port_path_cost; /* ADMIN_PORT_PATH_COST_AUTO - auto sence */
-  ADMIN_P2P_T   admin_point2point;
-  unsigned char admin_edge;
-  unsigned char admin_non_stp; /* 1- doesn't participate in STP, 1 - regular */
+	/* protocol data */
+	int port_priority;
+	unsigned long admin_port_path_cost; /* ADMIN_PORT_PATH_COST_AUTO - auto sence */
+	ADMIN_P2P_T admin_point2point;
+	unsigned char admin_edge;
+	unsigned char admin_non_stp; /* 1- doesn't participate in STP, 1 - regular */
 #ifdef STP_DBG
-  unsigned int	skip_rx;
-  unsigned int	skip_tx;
+	unsigned int skip_rx;
+	unsigned int skip_tx;
 #endif
 
-} UID_STP_PORT_CFG_T;
+}UID_STP_PORT_CFG_T;
 #endif
 
 typedef struct {
-  /* service data */
-  char              vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
-  unsigned int      port_no; /* key of the entry */
+	/* service data */
+	char vlan_name[NAME_LEN]; /* name of the VLAN, key of the bridge */
+	unsigned int port_no; /* key of the entry */
 
-  /* protocol data */
-  UID_PORT_ID       port_id;
-  RSTP_PORT_STATE   state;
-  unsigned long     path_cost;
+	/* protocol data */
+	UID_PORT_ID port_id;
+	RSTP_PORT_STATE state;
+	unsigned long path_cost;
 
-  UID_BRIDGE_ID_T   designated_root;
-  unsigned long     designated_cost;
-  UID_BRIDGE_ID_T   designated_bridge;
-  UID_PORT_ID       designated_port;
+	UID_BRIDGE_ID_T designated_root;
+	unsigned long designated_cost;
+	UID_BRIDGE_ID_T designated_bridge;
+	UID_PORT_ID designated_port;
 
 #if 0
-  int               infoIs;
-  unsigned short    handshake_flags;
+	int infoIs;
+	unsigned short handshake_flags;
 #endif
 
-  unsigned long     rx_cfg_bpdu_cnt;
-  unsigned long     rx_rstp_bpdu_cnt;
-  unsigned long     rx_tcn_bpdu_cnt;
-  int               fdWhile;      /* 17.15.1 */
-  int               helloWhen;    /* 17.15.2 */
-  int               mdelayWhile;  /* 17.15.3 */
-  int               rbWhile;      /* 17.15.4 */
-  int               rcvdInfoWhile;/* 17.15.5 */
-  int               rrWhile;      /* 17.15.6 */
-  int               tcWhile;      /* 17.15.7 */
-  int               txCount;      /* 17.18.40 */
-  int               lnkWhile;
+	unsigned long rx_cfg_bpdu_cnt;
+	unsigned long rx_rstp_bpdu_cnt;
+	unsigned long rx_tcn_bpdu_cnt;
+	int edgeDelayWhile;	/* 17.17.1 */
+	int fdWhile;		/* 17.17.2 */
+	int helloWhen;		/* 17.17.3 */
+	int mdelayWhile;	/* 17.17.4 */
+	int rbWhile;		/* 17.17.5 */
+	int rcvdInfoWhile;	/* 17.17.6 */
+	int rrWhile;		/* 17.17.7 */
+	int tcWhile;		/* 17.17.8 */
+	int txCount;		/* 17.19.44 */
 
-  unsigned long     uptime;       /* 14.8.2.1.3.a */
-  unsigned long     oper_port_path_cost;
-  unsigned char     role;
-  unsigned char     oper_point2point;
-  unsigned char     oper_edge;
-  unsigned char     oper_stp_neigb;
-  unsigned char     top_change_ack;
-  unsigned char     tc;
+	unsigned long uptime;	/* 14.8.2.1.3.a */
+	unsigned long oper_port_path_cost;
+	unsigned char role;
+	unsigned char oper_point2point;
+	unsigned char oper_edge;
+	unsigned char oper_stp_neigb;
+	unsigned char top_change_ack;
+	unsigned char tc;
 } UID_STP_PORT_STATE_T;
 
 #endif

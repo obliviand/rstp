@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -26,25 +26,19 @@
 #define _RSTP_TIMES_H__
 
 typedef struct timevalues_t {
-  unsigned short MessageAge;
-  unsigned short MaxAge;
-  unsigned short ForwardDelay;
-  unsigned short HelloTime;
+	unsigned short MessageAge;
+	unsigned short MaxAge;
+	unsigned short ForwardDelay;
+	unsigned short HelloTime;
 } TIMEVALUES_T;
 
-int
-STP_compare_times (IN TIMEVALUES_T* t1, IN TIMEVALUES_T* t2);
+int STP_compare_times(IN TIMEVALUES_T *t1, IN TIMEVALUES_T *t2);
 
-void
-STP_get_times (IN BPDU_BODY_T* b, OUT TIMEVALUES_T* v);
+void STP_get_times(IN BPDU_BODY_T *b, OUT TIMEVALUES_T *v);
 
-void
-STP_set_times (IN TIMEVALUES_T* v, OUT BPDU_BODY_T* b);
+void STP_set_times (IN TIMEVALUES_T *v, OUT BPDU_BODY_T *b);
 
-void
-STP_copy_times (OUT TIMEVALUES_T* t, IN TIMEVALUES_T* f);
+void STP_copy_times (OUT TIMEVALUES_T *t, IN TIMEVALUES_T *f);
 
 #endif /* _RSTP_TIMES_H__ */
-
-
 

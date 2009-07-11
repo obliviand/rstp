@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -20,21 +20,19 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* The Port Information State Machine : 17.21 */
+/* The Port Information State Machine : 17.27 */
  
 #ifndef _STP_INFOR_H__
 #define _STP_INFOR_H__
 
-void
-STP_info_enter_state (STATE_MACH_T* s);
+Bool updtBPDUVersion(STATE_MACH_T *this);
 
-Bool
-STP_info_check_conditions (STATE_MACH_T* s);
+void STP_info_enter_state(STATE_MACH_T *s);
 
-void
-STP_info_rx_bpdu (PORT_T* this, struct stp_bpdu_t* bpdu, size_t len);
+Bool STP_info_check_conditions(STATE_MACH_T *s);
 
-char*
-STP_info_get_state_name (int state);
+void STP_info_rx_bpdu(PORT_T *this, struct stp_bpdu_t *bpdu, size_t len);
+
+char *STP_info_get_state_name(int state);
 
 #endif /* _STP_INFOR_H__ */

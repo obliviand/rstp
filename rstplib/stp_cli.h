@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -25,6 +25,6 @@
 
 extern int I_am_a_stupid_hub;
 
-int stp_cli_init ();
+int stp_cli_init();
 
 #endif /* _STP_CLI__ */

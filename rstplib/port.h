@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -20,165 +20,168 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* STP PORT instance : 17.18, 17.15 */
- 
+/* STP PORT instance : 17.19, 17.17 */
+
 #ifndef _STP_PORT_H__
 #define _STP_PORT_H__
 
 #include "statmch.h"
 
 #define TIMERS_NUMBER   9
-typedef unsigned int    PORT_TIMER_T;
+typedef unsigned int PORT_TIMER_T;
 
 typedef enum {
-  Mine,
-  Aged,
-  Received,
-  Disabled
+	Mine,
+	Aged,
+	Received,
+	Disabled
 } INFO_IS_T;
 
 typedef enum {
-  SuperiorDesignateMsg,
-  RepeatedDesignateMsg,
-  ConfirmedRootMsg,
-  OtherMsg
-} RCVD_MSG_T;
+	SuperiorDesignatedInfo,
+	RepeatedDesignatedInfo,
+	InferiorDesignatedInfo,
+	InferiorRootAlternateInfo,
+	OtherInfo
+} RCVD_INFO_T;
 
 typedef enum {
-  DisabledPort = 0,
-  AlternatePort,
-  BackupPort,
-  RootPort,
-  DesignatedPort,
-  NonStpPort
+	DisabledPort = 0,
+	AlternatePort,
+	BackupPort,
+	RootPort,
+	DesignatedPort,
+	NonStpPort
 } PORT_ROLE_T;
 
 typedef struct port_t {
-  struct port_t*     next;
+	struct port_t	*next;
 
-  /* per Port state machines */
-  STATE_MACH_T*     info;      /* 17.21 */
-  STATE_MACH_T*     roletrns;  /* 17.23 */
-  STATE_MACH_T*     sttrans;   /* 17.24 */
-  STATE_MACH_T*     topoch;    /* 17.25 */
-  STATE_MACH_T*     migrate;   /* 17.26 */
-  STATE_MACH_T*     transmit;  /* 17.26 */
-  STATE_MACH_T*     p2p;       /* 6.4.3, 6.5.1 */
-  STATE_MACH_T*     edge;      /*  */
-  STATE_MACH_T*     pcost;     /*  */
+	/* per Port state machines */
 
-  STATE_MACH_T*     machines; /* list of machines */
+	STATE_MACH_T	*receive;		/* 17.23 */
+	STATE_MACH_T	*migrate;		/* 17.24 */
+	STATE_MACH_T	*brdgdet;		/* 17.25 */
+	STATE_MACH_T	*transmit;		/* 17.26 */
+	STATE_MACH_T	*info;			/* 17.27 */
+	STATE_MACH_T	*roletrns;		/* 17.29 */
+	STATE_MACH_T	*sttrans;		/* 17.30 */
+	STATE_MACH_T	*topoch;		/* 17.31 */
+	STATE_MACH_T	*p2p;			/* 6.4.3, 6.5.1 */
+	STATE_MACH_T	*pcost;			/*  */
 
-  struct stpm_t*    owner; /* Bridge, that this port belongs to */
-  
-  /* per port Timers */
-  PORT_TIMER_T      fdWhile;      /* 17.15.1 */
-  PORT_TIMER_T      helloWhen;    /* 17.15.2 */
-  PORT_TIMER_T      mdelayWhile;  /* 17.15.3 */
-  PORT_TIMER_T      rbWhile;      /* 17.15.4 */
-  PORT_TIMER_T      rcvdInfoWhile;/* 17.15.5 */
-  PORT_TIMER_T      rrWhile;      /* 17.15.6 */
-  PORT_TIMER_T      tcWhile;      /* 17.15.7 */
-  PORT_TIMER_T      txCount;      /* 17.18.40 */
-  PORT_TIMER_T      lnkWhile;
+	STATE_MACH_T	*machines;		/* list of machines */
 
-  PORT_TIMER_T*     timers[TIMERS_NUMBER]; /*list of timers */
+	struct stpm_t	*owner;			/* Bridge, that this port belongs to */
 
-  Bool              agreed;        /* 17.18.1 */
-  PRIO_VECTOR_T     designPrio;    /* 17.18.2 */
-  TIMEVALUES_T      designTimes;   /* 17.18.3 */
-  Bool              forward;       /* 17.18.4 */
-  Bool              forwarding;    /* 17.18.5 */
-  INFO_IS_T         infoIs;        /* 17.18.6 */
-  Bool              initPm;        /* 17.18.7  */
-  Bool              learn;         /* 17.18.8 */
-  Bool              learning;      /* 17.18.9 */
-  Bool              mcheck;        /* 17.18.10 */
-  PRIO_VECTOR_T     msgPrio;       /* 17.18.11 */
-  TIMEVALUES_T      msgTimes;      /* 17.18.12 */
-  Bool              newInfo;       /* 17.18.13 */
-  Bool              operEdge;      /* 17.18.14 */
-  Bool              adminEdge;     /* 17.18.14 */
-  Bool              portEnabled;   /* 17.18.15 */
-  PORT_ID           port_id;       /* 17.18.16 */
-  PRIO_VECTOR_T     portPrio;      /* 17.18.17 */
-  TIMEVALUES_T      portTimes;     /* 17.18.18 */
-  Bool              proposed;      /* 17.18.19 */
-  Bool              proposing;     /* 17.18.20 */
-  Bool              rcvdBpdu;      /* 17.18.21 */
-  RCVD_MSG_T        rcvdMsg;       /* 17.18.22 */
-  Bool              rcvdRSTP;      /* 17/18.23 */
-  Bool              rcvdSTP;       /* 17.18.24 */
-  Bool              rcvdTc;        /* 17.18.25 */
-  Bool              rcvdTcAck;     /* 17.18.26 */
-  Bool              rcvdTcn;       /* 17.18.27 */
-  Bool              reRoot;        /* 17.18.28 */
-  Bool              reselect;      /* 17.18.29 */
-  PORT_ROLE_T       role;          /* 17.18.30 */
-  Bool              selected;      /* 17.18.31 */
-  PORT_ROLE_T       selectedRole;  /* 17.18.32 */
-  Bool              sendRSTP;      /* 17.18.33 */
-  Bool              sync;          /* 17.18.34 */
-  Bool              synced;        /* 17.18.35 */
-  Bool              tc;            /* 17.18.36 */
-  Bool              tcAck;         /* 17.18.37 */
-  Bool              tcProp;        /* 17.18.38 */
+	/* per port Timers */
+	PORT_TIMER_T	edgeDelayWhile;		/* 17.17.1 */
+	PORT_TIMER_T	fdWhile;		/* 17.17.2 */
+	PORT_TIMER_T	helloWhen;		/* 17.17.3 */
+	PORT_TIMER_T	mdelayWhile;		/* 17.17.4 */
+	PORT_TIMER_T	rbWhile;		/* 17.17.5 */
+	PORT_TIMER_T	rcvdInfoWhile;		/* 17.17.6 */
+	PORT_TIMER_T	rrWhile;		/* 17.17.7 */
+	PORT_TIMER_T	tcWhile;		/* 17.17.8 */
+	PORT_TIMER_T	txCount;		/* 17.19.44 */
 
-  Bool              updtInfo;      /* 17.18.41 */
+	PORT_TIMER_T	*timers[TIMERS_NUMBER];	/* list of timers */
 
-  /* message information */
-  unsigned char     msgBpduVersion;
-  unsigned char     msgBpduType;
-  unsigned char     msgPortRole;
-  unsigned char     msgFlags;
+	unsigned int	ageingTime;		/* 17.19.1 */
+	Bool		agree;			/* 17.19.2 */
+	Bool		agreed;			/* 17.19.3 */
+	PRIO_VECTOR_T	designatedPriority;	/* 17.19.4 */
+	TIMEVALUES_T	designatedTimes;	/* 17.19.5 */
+	Bool		disputed;		/* 17.19.6 */
+	Bool		fbdFlush;		/* 17.19.7 */
+	Bool		forward;		/* 17.19.8 */
+	Bool		forwarding;		/* 17.19.9 */
+	INFO_IS_T	infoIs;			/* 17.19.10 */
+	Bool		learn;			/* 17.19.11 */
+	Bool		learning;		/* 17.19.12 */
+	Bool		mcheck;			/* 17.19.13 */
+	PRIO_VECTOR_T	msgPriority;		/* 17.19.14 */
+	TIMEVALUES_T	msgTimes;		/* 17.19.15 */
+	Bool		newInfo;		/* 17.19.16 */
+	Bool		operEdge;		/* 17.19.17 */
+	Bool		portEnabled;		/* 17.19.18 */
+	PORT_ID		portId;			/* 17.19.19 */
+	unsigned long	PortPathCost;		/* 17.19.20 */
+	PRIO_VECTOR_T	portPriority;		/* 17.19.21 */
+	TIMEVALUES_T	portTimes;		/* 17.19.22 */
+	Bool		proposed;		/* 17.19.23 */
+	Bool		proposing;		/* 17.19.24 */
+	Bool		rcvdBPDU;		/* 17.19.25 */
+	RCVD_INFO_T	rcvdInfo;		/* 17.19.26 */
+	Bool		rcvdMsg;		/* 17.19.27 */
+	Bool		rcvdRSTP;		/* 17.19.28 */
+	Bool		rcvdSTP;		/* 17.19.29 */
+	Bool		rcvdTc;			/* 17.19.30 */
+	Bool		rcvdTcAck;		/* 17.19.31 */
+	Bool		rcvdTcn;		/* 17.19.32 */
+	Bool		reRoot;			/* 17.19.33 */
+	Bool		reselect;		/* 17.19.34 */
+	PORT_ROLE_T	role;			/* 17.19.35 */
+	Bool		selected;		/* 17.19.36 */
+	PORT_ROLE_T	selectedRole;		/* 17.19.37 */
+	Bool		sendRSTP;		/* 17.19.38 */
+	Bool		sync;			/* 17.19.39 */
+	Bool		synced;			/* 17.19.40 */
+	Bool		tc;			/* 17.19.41 */
+	Bool		tcAck;			/* 17.19.42 */
+	Bool		tick;			/* 17.19.43 */
+	Bool		tcProp;			/* 17.19.44 */
+	Bool		updtInfo;		/* 17.19.45 */
 
-  unsigned long     adminPCost; /* may be ADMIN_PORT_PATH_COST_AUTO */
-  unsigned long     operPCost;
-  unsigned long     operSpeed;
-  unsigned long     usedSpeed;
-  int               LinkDelay;   /* TBD: LinkDelay may be managed ? */
-  Bool              adminEnable; /* 'has LINK' */
-  Bool              wasInitBpdu;  
-  Bool              admin_non_stp;
+	/* message information */
+	unsigned char	msgBpduVersion;
+	unsigned char	msgBpduType;
+	unsigned char	msgPortRole;
+	unsigned char	msgFlags;
 
-  Bool              p2p_recompute;
-  Bool              operPointToPointMac;
-  ADMIN_P2P_T       adminPointToPointMac;
+	unsigned long	adminPCost; /* may be ADMIN_PORT_PATH_COST_AUTO */
+	unsigned long	operPCost;
+	unsigned long	operSpeed;
+	unsigned long	usedSpeed;
+	int		LinkDelay; /* TBD: LinkDelay may be managed ? */
+	Bool		AdminEdgePort;
+	Bool		AutoEdgePort;
+	Bool		adminEnable; /* 'has LINK' */
+	Bool		wasInitBpdu;
+	Bool		admin_non_stp;
 
-  /* statistics */
-  unsigned long     rx_cfg_bpdu_cnt;
-  unsigned long     rx_rstp_bpdu_cnt;
-  unsigned long     rx_tcn_bpdu_cnt;
+	Bool		p2p_recompute;
+	Bool		operPointToPointMac;
+	ADMIN_P2P_T	adminPointToPointMac;
 
-  unsigned long     uptime;       /* 14.8.2.1.3.a */
+	/* statistics */
+	unsigned long	rx_cfg_bpdu_cnt;
+	unsigned long	rx_rstp_bpdu_cnt;
+	unsigned long	rx_tcn_bpdu_cnt;
 
-  int               port_index;
-  char*             port_name;
+	unsigned long	uptime; /* 14.8.2.1.3.a */
+
+	int		port_index;
+	char		*port_name;
 
 #ifdef STP_DBG
-  unsigned int	    skip_rx;
-  unsigned int	    skip_tx;
+	unsigned int	skip_rx;
+	unsigned int	skip_tx;
 #endif
 } PORT_T;
 
-PORT_T*
-STP_port_create (struct stpm_t* stpm, int port_index);
+PORT_T *STP_port_create(struct stpm_t *stpm, int port_index);
 
-void
-STP_port_delete (PORT_T* this);
+void STP_port_delete(PORT_T *this);
 
-int
-STP_port_rx_bpdu (PORT_T* this, BPDU_T* bpdu, size_t len);
+int STP_port_rx_bpdu (PORT_T *this, BPDU_T *bpdu, size_t len);
 
-void
-STP_port_init (PORT_T* this, struct stpm_t* stpm, Bool check_link);
+void STP_port_init (PORT_T *this, struct stpm_t *stpm, Bool check_link);
 
 #ifdef STP_DBG
-int
-STP_port_trace_state_machine (PORT_T* this, char* mach_name, int enadis, int vlan_id);
+int STP_port_trace_state_machine (PORT_T *this, char *mach_name, int enadis, int vlan_id);
 
-void
-STP_port_trace_flags (char* title, PORT_T* this);
+void STP_port_trace_flags (char *title, PORT_T *this);
 #endif
 
 #endif /*  _STP_PORT_H__ */

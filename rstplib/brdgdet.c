@@ -20,65 +20,55 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* Point To Point MAC mode selection machine : 6.4.3, 6.5.1 */
-
+/* Bridge Detection state machine : 17.25 */
+ 
 #include "base.h"
 #include "stpm.h"
-#include "stp_to.h" /* for STP_OUT_get_duplex */
 
-#define STATES {		\
-	CHOOSE(INIT),		\
-	CHOOSE(RECOMPUTE),	\
-	CHOOSE(STABLE),		\
+#define STATES { \
+	CHOOSE(EDGE),         \
+	CHOOSE(NOT_EDGE),     \
 }
 
-#define GET_STATE_NAME STP_p2p_get_state_name
+#define GET_STATE_NAME STP_brdgdet_get_state_name
 #include "choose.h"
 
-static Bool computeP2P(PORT_T *port)
-{
-	switch (port->adminPointToPointMac) {
-		case P2P_FORCE_TRUE:
-			return True;
-		case P2P_FORCE_FALSE:
-			return False;
-		default:
-		case P2P_AUTO:
-			return STP_OUT_get_duplex (port->port_index);
-	}
-}
-
-void STP_p2p_enter_state(STATE_MACH_T *s)
+void STP_brdgdet_enter_state(STATE_MACH_T *s)
 {
 	register PORT_T *port = s->owner.port;
 
 	switch (s->State) {
 		case BEGIN:
-		case INIT:
-			port->p2p_recompute = True;
 			break;
-		case RECOMPUTE:
-			port->operPointToPointMac = computeP2P (port);
-			port->p2p_recompute = False;
+		case EDGE:
+			port->operEdge = True;
 			break;
-		case STABLE:
+		case NOT_EDGE:
+			port->operEdge = False;
 			break;
 	}
 }
 
-Bool STP_p2p_check_conditions(STATE_MACH_T *s)
+Bool STP_brdgdet_check_conditions(STATE_MACH_T *s)
 {
 	register PORT_T *port = s->owner.port;
 
 	switch (s->State) {
 		case BEGIN:
-		case INIT:
-			return STP_hop_2_state(s, STABLE);
-		case RECOMPUTE:
-			return STP_hop_2_state(s, STABLE);
-		case STABLE:
-			if (port->p2p_recompute) {
-				return STP_hop_2_state(s, RECOMPUTE);
+			if (port->AdminEdgePort) {
+				return STP_hop_2_state(s, EDGE);
+			}
+			return STP_hop_2_state(s, NOT_EDGE);
+		case EDGE:
+			if ((!port->portEnabled && !port->AdminEdgePort) || !port->operEdge) {
+				return STP_hop_2_state(s, NOT_EDGE);
+			}
+			break;
+		case NOT_EDGE:
+			if ((!port->portEnabled && port->AdminEdgePort) ||
+			    ((port->edgeDelayWhile == 0) && port->AutoEdgePort &&
+			      port->sendRSTP && port->proposing)) {
+				return STP_hop_2_state(s, EDGE);
 			}
 			break;
 	}

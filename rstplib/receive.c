@@ -20,74 +20,63 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* Port Protocol Migration state machine : 17.24 */
- 
+/* Port Receive state machine : 17.23 */
+  
 #include "base.h"
 #include "stpm.h"
+#include "stp_to.h" /* for STP_OUT_get_port_mac & STP_OUT_tx_bpdu */
+#include "portinfo.h"
 #include "migrate.h"
 
 #define STATES {		\
-	CHOOSE(CHECKING_RSTP),	\
-	CHOOSE(SELECTING_STP),	\
-	CHOOSE(SENSING),		\
+	CHOOSE(DISCARD),	\
+	CHOOSE(RECEIVE),	\
 }
 
-#define GET_STATE_NAME STP_migrate_get_state_name
+#define GET_STATE_NAME STP_receive_get_state_name
 #include "choose.h"
 
-void STP_migrate_enter_state(STATE_MACH_T *this)
+void STP_receive_enter_state(STATE_MACH_T *this)
 {
 	register PORT_T *port = this->owner.port;
-	register STPM_T *stpm = port->owner;
 
 	switch (this->State) {
 		case BEGIN:
-		case CHECKING_RSTP:
-			port->mcheck = False;
-			port->sendRSTP = stpm->rstpVersion;
-			port->mdelayWhile = MigrateTime;
+		case DISCARD:
+			port->rcvdBPDU = port->rcvdRSTP = port->rcvdSTP = False;
+			port->rcvdMsg = False;
+			port->edgeDelayWhile = MigrateTime;
 			break;
-		case SELECTING_STP:
-			port->sendRSTP = False;
-			port->mdelayWhile = MigrateTime;
+		case RECEIVE:
+			updtBPDUVersion(this);
+			port->operEdge = port->rcvdBPDU = False;
+			port->rcvdMsg = True;
+			port->edgeDelayWhile = MigrateTime;
 			break;
-		case SENSING:
-			port->rcvdRSTP = port->rcvdSTP = False;
-			break;
-	}
+	};
 }
 
-Bool STP_migrate_check_conditions(STATE_MACH_T *this)
+Bool STP_receive_check_conditions(STATE_MACH_T *this)
 {
 	register PORT_T *port = this->owner.port;
-	register STPM_T *stpm = port->owner;
 
-	if (BEGIN == this->State)
-		return STP_hop_2_state (this, CHECKING_RSTP);
-
-	switch (this->State) {
-		case CHECKING_RSTP:
-			if (port->mdelayWhile == 0) {
-				return STP_hop_2_state(this, SENSING);
-			}
-			if (port->mdelayWhile != MigrateTime && !port->portEnabled) {
-				return STP_hop_2_state(this, CHECKING_RSTP);
-			}
-			break;
-		case SELECTING_STP:
-			if (port->mdelayWhile == 0 ||
-			    !port->portEnabled || port->mcheck) {
-				return STP_hop_2_state(this, SENSING);
-			}
-			break;
-		case SENSING:
-			if (!port->portEnabled || port->mcheck ||
-			    (stpm->rstpVersion && !port->sendRSTP && port->rcvdRSTP)) {
-				return STP_hop_2_state(this, CHECKING_RSTP);
-			}
-			if (port->sendRSTP && port->rcvdSTP) {
-				return STP_hop_2_state(this, SELECTING_STP);
-			}
+	if (BEGIN == this->State ||
+	    ((port->rcvdBPDU || (port->edgeDelayWhile != MigrateTime)) && !port->portEnabled)) {
+		return STP_hop_2_state(this, DISCARD);
 	}
+	
+	switch (this->State) {
+		case DISCARD:
+			if (port->rcvdBPDU && port->portEnabled) {
+				return STP_hop_2_state(this, RECEIVE);
+			}
+			break;
+		case RECEIVE:
+			if (port->rcvdBPDU && port->portEnabled && !port->rcvdMsg) {
+				return STP_hop_2_state(this, RECEIVE);
+			}
+			break;
+	};
 	return False;
 }
+

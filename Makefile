@@ -8,21 +8,21 @@ CTLSOURCES = ctl_main.c ctl_cli_wrap.c ctl_socket_client.c
 
 CTLOBJECTS = $(CTLSOURCES:.c=.o)
 
-CC=gcc
-CFLAGS = -Wall -Werror -O2 -g -D_REENTRANT -D__LINUX__ -DVERSION=$(version) -DBUILD=$(build) -I. -I./include -I./rstplib
+#CC=gcc
+CFLAGS = -Wall -Werror -Os -pipe -g -D_REENTRANT -D__LINUX__ -DVERSION=$(version) -DBUILD=$(build) -I. -I./include -I./rstplib
 
 all: rstpd rstpctl
 
 rstplib:
-	make -C rstplib librstp.a
+	make CC=$(CC) -C rstplib librstp.so
 
 .PHONY: rstplib
 
 rstpd: $(DOBJECTS) rstplib
-	$(CC) -o $@ $(DOBJECTS) -L ./rstplib -lrstp
+	$(CC) $(CFLAGS) -o $@ $(DOBJECTS) -L ./rstplib -lrstp
 
 rstpctl: $(CTLOBJECTS)
-	$(CC) -o $@ $(CTLOBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(CTLOBJECTS)
 
 clean:
 	rm -f *.o rstpd rstpctl

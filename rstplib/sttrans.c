@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -20,124 +20,101 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* Port State Transition state machine : 17.24 */
+/* Port State Transition state machine : 17.30 */
     
 #include "base.h"
 #include "stpm.h"
 #include "stp_to.h"
 
-#define STATES { \
-  CHOOSE(DISCARDING),   \
-  CHOOSE(LEARNING), \
-  CHOOSE(FORWARDING),   \
+#define STATES {		\
+	CHOOSE(DISCARDING),	\
+	CHOOSE(LEARNING),	\
+	CHOOSE(FORWARDING),	\
 }
 
 #define GET_STATE_NAME STP_sttrans_get_state_name
 #include "choose.h"
 
-
-#ifdef STRONGLY_SPEC_802_1W
-static Bool
-disableLearning (STATE_MACH_T *this)
+static Bool disableLearning(STATE_MACH_T *this)
 {
-  register PORT_T *port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  return STP_OUT_set_learning (port->port_index, port->owner->vlan_id, False);
+	return STP_OUT_set_learning (port->port_index, port->owner->vlan_id, False);
 }
 
-static Bool
-enableLearning (STATE_MACH_T *this)
+static Bool enableLearning(STATE_MACH_T *this)
 {
-  register PORT_T *port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  return STP_OUT_set_learning (port->port_index, port->owner->vlan_id, True);
+	return STP_OUT_set_learning (port->port_index, port->owner->vlan_id, True);
 }
 
-static Bool
-disableForwarding (STATE_MACH_T *this)
+static Bool disableForwarding(STATE_MACH_T *this)
 {
-  register PORT_T *port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  return STP_OUT_set_forwarding (port->port_index, port->owner->vlan_id, False);
+	return STP_OUT_set_forwarding (port->port_index, port->owner->vlan_id, False);
 }
 
-static Bool
-enableForwarding (STATE_MACH_T *this)
+static Bool enableForwarding(STATE_MACH_T *this)
 {
-  register PORT_T *port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  return STP_OUT_set_forwarding (port->port_index, port->owner->vlan_id, True);
+	return STP_OUT_set_forwarding (port->port_index, port->owner->vlan_id, True);
 }
-#endif
 
-void
-STP_sttrans_enter_state (STATE_MACH_T *this)
+void STP_sttrans_enter_state(STATE_MACH_T *this)
 {
-  register PORT_T    *port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  switch (this->State) {
-    case BEGIN:
-    case DISCARDING:
-      port->learning = False;
-      port->forwarding = False;
-#ifdef STRONGLY_SPEC_802_1W
-      disableLearning (this);
-      disableForwarding (this);
-#else
-      STP_OUT_set_port_state (port->port_index, port->owner->vlan_id, UID_PORT_DISCARDING);
-#endif
-      break;
-    case LEARNING:
-      port->learning = True;
-#ifdef STRONGLY_SPEC_802_1W
-      enableLearning (this);
-#else
-      STP_OUT_set_port_state (port->port_index, port->owner->vlan_id, UID_PORT_LEARNING);
-#endif
-      break;
-    case FORWARDING:
-      port->tc = !port->operEdge;
-      port->forwarding = True;
-#ifdef STRONGLY_SPEC_802_1W
-      enableForwarding (this);
-#else
-      STP_OUT_set_port_state (port->port_index, port->owner->vlan_id, UID_PORT_FORWARDING);
-#endif
-      break;
-  }
+	switch (this->State) {
+		case BEGIN:
+		case DISCARDING:
+			disableLearning (this);
+			port->learning = False;
+			disableForwarding (this);
+			port->forwarding = False;
+			break;
+		case LEARNING:
+			enableLearning (this);
+			port->learning = True;
+			break;
+		case FORWARDING:
+			enableForwarding (this);
+			port->forwarding = True;
+			break;
+	}
 
 }
 
-Bool
-STP_sttrans_check_conditions (STATE_MACH_T *this)
+Bool STP_sttrans_check_conditions(STATE_MACH_T *this)
 {
-  register PORT_T       *port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  if (BEGIN == this->State) {
-    return STP_hop_2_state (this, DISCARDING);
-  }
+	if (BEGIN == this->State) {
+		return STP_hop_2_state (this, DISCARDING);
+	}
 
-  switch (this->State) {
-    case DISCARDING:
-      if (port->learn) {
-        return STP_hop_2_state (this, LEARNING);
-      }
-      break;
-    case LEARNING:
-      if (port->forward) {
-        return STP_hop_2_state (this, FORWARDING);
-      }
-      if (!port->learn) {
-        return STP_hop_2_state (this, DISCARDING);
-      }
-      break;
-    case FORWARDING:
-      if (!port->forward) {
-        return STP_hop_2_state (this, DISCARDING);
-      }
-      break;
-  }
+	switch (this->State) {
+		case DISCARDING:
+			if (port->learn) {
+				return STP_hop_2_state (this, LEARNING);
+			}
+			break;
+		case LEARNING:
+			if (port->forward) {
+				return STP_hop_2_state (this, FORWARDING);
+			}
+			if (!port->learn) {
+				return STP_hop_2_state (this, DISCARDING);
+			}
+			break;
+		case FORWARDING:
+			if (!port->forward) {
+				return STP_hop_2_state (this, DISCARDING);
+			}
+			break;
+	}
 
-  return False;
+	return False;
 }
-

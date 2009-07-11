@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -25,13 +25,10 @@
 #ifndef _STP_PCOST_H__
 #define _STP_PCOST_H__
 
-void
-STP_pcost_enter_state (STATE_MACH_T* s);
+void STP_pcost_enter_state(STATE_MACH_T *s);
 
-Bool
-STP_pcost_check_conditions (STATE_MACH_T* s);
+Bool STP_pcost_check_conditions(STATE_MACH_T *s);
 
-char*
-STP_pcost_get_state_name (int state);
+char *STP_pcost_get_state_name(int state);
 
 #endif /* _STP_PCOST_H__ */

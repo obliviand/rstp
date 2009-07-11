@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -20,22 +20,16 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-/* Port Role Selection state machine : 17.22 */
+/* Port Role Selection state machine : 17.28 */
 
 #ifndef _STP_ROLES_SELECT_H
 #define _STP_ROLES_SELECT_H
 
-void
-STP_rolesel_enter_state (STATE_MACH_T* s);
+void STP_rolesel_enter_state(STATE_MACH_T *s);
 
-Bool
-STP_rolesel_check_conditions (STATE_MACH_T* s);
+Bool STP_rolesel_check_conditions(STATE_MACH_T *s);
 
-void
-STP_rolesel_update_stpm (struct stpm_t* this);
-
-char*
-STP_rolesel_get_state_name (int state);
+char *STP_rolesel_get_state_name(int state);
 
 #endif /* _STP_ROLES_SELECT_H */
 

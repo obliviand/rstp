@@ -20,43 +20,15 @@
  * 02111-1307, USA. 
  **********************************************************************/
 
-#include "uid_sock.h"
+/* Bridge Detection state machine : 17.25 */
+ 
+#ifndef _STP_BRDGDET_H__
+#define _STP_BRDGDET_H__
 
-typedef enum {
-	UID_CNTRL = 0,
-	UID_BPDU
-} UID_CMD_TYPE_T;
+void STP_brdgdet_enter_state(STATE_MACH_T *s);
 
-typedef enum {
-	UID_PORT_CONNECT,
-	UID_PORT_DISCONNECT,
-	UID_BRIDGE_SHUTDOWN,
-	UID_BRIDGE_HANDSHAKE,
-	UID_LAST_DUMMY
-} UID_CNTRL_CMD_T;
+Bool STP_brdgdet_check_conditions(STATE_MACH_T *s);
 
-typedef struct uid_port_control_s {
-	UID_CNTRL_CMD_T cmd;
-	unsigned long param1;
-	unsigned long param2;
-} UID_CNTRL_BODY_T;
+char *STP_brdgdet_get_state_name(int state);
 
-typedef struct uid_msg_header_s {
-	UID_CMD_TYPE_T cmd_type;
-	long sender_pid;
-	int destination_port;
-	int source_port;
-	size_t body_len;
-} UID_MSG_HEADER_T;
-
-typedef struct uid_msg_s {
-	UID_MSG_HEADER_T header;
-	union {
-		UID_CNTRL_BODY_T cntrl;
-		char bpdu[64];
-	} body;
-
-} UID_MSG_T;
-
-#define MAX_UID_MSG_SIZE sizeof(UID_MSG_T)
-
+#endif /* _STP_BRDGDET_H__ */

@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -26,108 +26,103 @@
 #include "stpm.h"
 #include "stp_to.h" /* for STP_OUT_get_port_oper_speed */
 
-#define STATES {        \
-  CHOOSE(AUTO),         \
-  CHOOSE(FORSE),        \
-  CHOOSE(STABLE),       \
+#define STATES {	\
+	CHOOSE(AUTO),	\
+	CHOOSE(FORCE),	\
+	CHOOSE(STABLE),	\
 }
 
 #define GET_STATE_NAME STP_pcost_get_state_name
 #include "choose.h"
 
-static long
-computeAutoPCost (STATE_MACH_T *this)
+static long computeAutoPCost(STATE_MACH_T *this)
 {
-    long lret;
-    register PORT_T*  port = this->owner.port;
+	long lret;
+	register PORT_T *port = this->owner.port;
 
-    if (port->usedSpeed        < 10L) {         /* < 10Mb/s */
-        lret = 20000000;
-    } else if (port->usedSpeed <= 10L) {        /* 10 Mb/s  */
-        lret = 2000000;        
-    } else if (port->usedSpeed <= 100L) {       /* 100 Mb/s */
-        lret = 200000;     
-    } else if (port->usedSpeed <= 1000L) {      /* 1 Gb/s */
-        lret = 20000;      
-    } else if (port->usedSpeed <= 10000L) {     /* 10 Gb/s */
-        lret = 2000;       
-    } else if (port->usedSpeed <= 100000L) {    /* 100 Gb/s */
-        lret = 200;        
-    } else if (port->usedSpeed <= 1000000L) {   /* 1 GTb/s */
-        lret = 20;     
-    } else if (port->usedSpeed <= 10000000L) {  /* 10 Tb/s */
-        lret = 2;      
-    } else   /* ??? */                        { /* > Tb/s */
-        lret = 1;       
-    }
+	if (port->usedSpeed < 10L) { /* < 10Mb/s */
+		lret = 20000000;
+	} else if (port->usedSpeed <= 10L) { /* 10 Mb/s  */
+		lret = 2000000;
+	} else if (port->usedSpeed <= 100L) { /* 100 Mb/s */
+		lret = 200000;
+	} else if (port->usedSpeed <= 1000L) { /* 1 Gb/s */
+		lret = 20000;
+	} else if (port->usedSpeed <= 10000L) { /* 10 Gb/s */
+		lret = 2000;
+	} else if (port->usedSpeed <= 100000L) { /* 100 Gb/s */
+		lret = 200;
+	} else if (port->usedSpeed <= 1000000L) { /* 1 GTb/s */
+		lret = 20;
+	} else if (port->usedSpeed <= 10000000L) { /* 10 Tb/s */
+		lret = 2;
+	} else /* ??? */{ /* > Tb/s */
+		lret = 1;
+	}
 #ifdef STP_DBG
-    if (port->pcost->debug) {
-      stp_trace ("usedSpeed=%lu lret=%ld", port->usedSpeed, lret);
-    }
+	if (port->pcost->debug) {
+		stp_trace("usedSpeed=%lu lret=%ld", port->usedSpeed, lret);
+	}
 #endif
 
-    return lret;
+	return lret;
 }
 
-static void
-updPortPathCost (PORT_T *port)
-{
-  port->reselect = True;
-  port->selected = False;
+static void updPortPathCost(PORT_T *port) {
+	port->reselect = True;
+	port->selected = False;
 }
 
 void
-STP_pcost_enter_state (STATE_MACH_T *this)
+STP_pcost_enter_state(STATE_MACH_T *this)
 {
-  register PORT_T*  port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  switch (this->State) {
-    case BEGIN:
-      break;
-    case AUTO:
-      port->operSpeed = STP_OUT_get_port_oper_speed (port->port_index);
+	switch (this->State) {
+		case BEGIN:
+			break;
+		case AUTO:
+			port->operSpeed = STP_OUT_get_port_oper_speed(port->port_index);
 #ifdef STP_DBG
-      if (port->pcost->debug) {
-        stp_trace ("AUTO:operSpeed=%lu", port->operSpeed);
-      }
+			if (port->pcost->debug) {
+				stp_trace("AUTO:operSpeed=%lu", port->operSpeed);
+			}
 #endif
-      port->usedSpeed = port->operSpeed;
-      port->operPCost = computeAutoPCost (this);
-      break;
-    case FORSE:
-      port->operPCost = port->adminPCost;
-      port->usedSpeed = -1;
-      break;
-    case STABLE:
-      updPortPathCost (port);
-      break;
-  }
+			port->usedSpeed = port->operSpeed;
+			port->operPCost = computeAutoPCost (this);
+			break;
+		case FORCE:
+			port->operPCost = port->adminPCost;
+			port->usedSpeed = -1;
+			break;
+		case STABLE:
+			updPortPathCost (port);
+			break;
+	}
 }
 
-Bool
-STP_pcost_check_conditions (STATE_MACH_T* this)
+Bool STP_pcost_check_conditions(STATE_MACH_T *this)
 {
-  register PORT_T*  port = this->owner.port;
+	register PORT_T *port = this->owner.port;
 
-  switch (this->State) {
-    case BEGIN:
-      return STP_hop_2_state (this, AUTO);
-    case AUTO:
-      return STP_hop_2_state (this, STABLE);
-    case FORSE:
-      return STP_hop_2_state (this, STABLE);
-    case STABLE:
-      if (ADMIN_PORT_PATH_COST_AUTO == port->adminPCost && 
-          port->operSpeed != port->usedSpeed) {
-          return STP_hop_2_state (this, AUTO);
-      }
+	switch (this->State) {
+		case BEGIN:
+			return STP_hop_2_state(this, AUTO);
+		case AUTO:
+			return STP_hop_2_state(this, STABLE);
+		case FORCE:
+			return STP_hop_2_state(this, STABLE);
+		case STABLE:
+			if (ADMIN_PORT_PATH_COST_AUTO == port->adminPCost &&
+			    port->operSpeed != port->usedSpeed) {
+				return STP_hop_2_state(this, AUTO);
+			}
 
-      if (ADMIN_PORT_PATH_COST_AUTO != port->adminPCost &&
-          port->operPCost != port->adminPCost) {
-          return STP_hop_2_state (this, FORSE);
-      }
-      break;
-  }
-  return False;
+			if (ADMIN_PORT_PATH_COST_AUTO != port->adminPCost &&
+			    port->operPCost != port->adminPCost) {
+				return STP_hop_2_state(this, FORCE);
+			}
+			break;
+	}
+	return False;
 }
-

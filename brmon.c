@@ -119,22 +119,22 @@ static int dump_msg(const struct sockaddr_nl *who, struct nlmsghdr *n,
 	if (tb[IFLA_OPERSTATE]) {
 		int state = *(int*)RTA_DATA(tb[IFLA_OPERSTATE]);
 		switch (state) {
-		case IF_OPER_UNKNOWN: 
-			fprintf(fp, "Unknown "); break;
-		case IF_OPER_NOTPRESENT:
-			fprintf(fp, "Not Present "); break;
-		case IF_OPER_DOWN:
-			fprintf(fp, "Down "); break;
-		case IF_OPER_LOWERLAYERDOWN:
-			fprintf(fp, "Lowerlayerdown "); break;
-		case IF_OPER_TESTING:
-			fprintf(fp, "Testing "); break;
-		case IF_OPER_DORMANT:
-			fprintf(fp, "Dormant "); break;
-		case IF_OPER_UP:
-			fprintf(fp, "Up "); break;
-		default:
-			fprintf(fp, "State(%d) ", state);
+			case IF_OPER_UNKNOWN: 
+				fprintf(fp, "Unknown "); break;
+			case IF_OPER_NOTPRESENT:
+				fprintf(fp, "Not Present "); break;
+			case IF_OPER_DOWN:
+				fprintf(fp, "Down "); break;
+			case IF_OPER_LOWERLAYERDOWN:
+				fprintf(fp, "Lowerlayerdown "); break;
+			case IF_OPER_TESTING:
+				fprintf(fp, "Testing "); break;
+			case IF_OPER_DORMANT:
+				fprintf(fp, "Dormant "); break;
+			case IF_OPER_UP:
+				fprintf(fp, "Up "); break;
+			default:
+				fprintf(fp, "State(%d) ", state);
 		}
 	}
 	

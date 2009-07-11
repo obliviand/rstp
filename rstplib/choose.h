@@ -1,5 +1,5 @@
 /************************************************************************ 
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
+ * RSTP library - Rapid Spanning Tree (802.1D-2004) 
  * Copyright (C) 2001-2003 Optical Access 
  * Author: Alex Rozin 
  * 
@@ -29,14 +29,15 @@
 typedef enum STATES THE_STATE_T;
 #undef CHOOSE
 
-char * GET_STATE_NAME (int state)
-{
+char *GET_STATE_NAME(int state) {
 #define CHOOSE(a) #a
-static char    *state_names[] = STATES;
+	static char *state_names[] = STATES;
 #undef CHOOSE
 
-  if (BEGIN == state) return "Begin";
-  return state_names[state];
+	if (BEGIN == state) {
+		return "Begin";
+	}
+	return state_names[state];
 }
 
 #endif /* _STP_CHOOSE_H__ */
